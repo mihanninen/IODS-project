@@ -1,7 +1,10 @@
-
 # About the project
 
-*Write a short description about the course and add a link to your GitHub repository here. This is an R Markdown (.Rmd) file so you should use R Markdown syntax.*
+I first noticed this course from our doctoral student mailing list and thought it sounded interesting. I think Open Data and Open Science are both important aspects of good modern research, which is why I enrolled to this course to learn more about them. Additionally, I hadn't used R or RStudio let alone GitHub before this course, so I thought I could also learn to use these useful tools as well. So far this course has seemed very well organized, looking forward to learning more!
+
+## Reflecting on my learning experience
+
+I thought that the **R health for Data Science** book together with the **Exercise Set 1** were an excellent way to introduce us to basics of RStudio quickly and clearly. I especially liked using the exercise set, because it gave a nice visual after first reading about the different tools and commands first in the book. I don't know if there was a certain topic that was more difficult than others, rather I found it to be more of learning the logic of R and use it for your own purposes.
 
 ```{r}
 # This is a so-called "R chunk" where you can write R code.
@@ -9,5 +12,5 @@
 date()
 
 ```
-The text continues here.
 
+Click [here](https://github.com/mihanninen/IODS-project) to see my GitHub repository.
