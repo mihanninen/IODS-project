@@ -81,10 +81,10 @@ Hint: - For both functions you can pass a data frame as the first
 lrn14 <- read.table("http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-data.txt", sep="\t", header=TRUE)
 
 # Look at the dimensions of the data
-
+dim(lrn14)
 
 # Look at the structure of the data
-
+str(lrn14)
 
 ```
 
