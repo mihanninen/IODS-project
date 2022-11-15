@@ -1,13 +1,104 @@
-# Insert chapter 2 title here
+---
+---
+---
+
+# Assignment 2
 
 *Describe the work you have done this week and summarize your learning.*
 
-- Describe your work and results clearly. 
-- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods.
-- Assume the reader has no previous knowledge of your data or the more advanced methods you are using.
+-   Describe your work and results clearly.
+-   Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods.
+-   Assume the reader has no previous knowledge of your data or the more advanced methods you are using.
 
 ```{r}
+
 date()
+
 ```
+
+## 1. Part
+
+The data I'm using in my analysis is derived from the larger "JYTOPKYS2"-dataset. This dataset was collected from a survey to statistics students, that was used to evaluate to effects of learning approaches to exam results.
+
+Seven variables from the original dataset were chosen for this data (gender, age, attitude, deep learning, strategic learning, surface learning and exam points). Additionally, students who scored 0 in their exam were excluded from this data.
+
+The variable `attitude` in `learning2014` is a sum of 10 questions related to students attitude towards statistics, each measured on the [Likert scale](https://en.wikipedia.org/wiki/Likert_scale) (1-5).
+
+Variables `deep` (deep learning), `stra`(strategic learning) and `surf`(surface learning) in `learning2014` are the mean values from the combinations of questions that relate to each learning approach, respectively. Each question was once again measured on the Likert scale (1-5).
+
+In the following R chunk I will explore the structure and dimensions of the data further.
+
+```{r part 1}
+# reading the data into memory
+learning2014 <- read.csv("~/Documents/Tohtoritutkinto/Open Science/IODS-project/data/learning2014.csv", sep = ",", header = TRUE)
+
+#displaying dataframe
+learning2014
+
+# the dataset has 166 rows and 7 columns
+dim(learning2014)
+
+# there are 7 variables and 166 observations. One variable is a character string, while the other variables are integers or numbers
+str(learning2014)
+
+# a summary of the variables
+summary(learning2014)
+```
+## 2. Part
+
+Here I present a graphical overview of the data and show summaries of the variables in the data.
+
+```{r part 2}
+# accessing the GGally and ggplot2 libraries
+library(GGally)
+library(ggplot2)
+
+# creating a plot matrix to give a graphical overview of the data
+p <- ggpairs(learning2014, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
+
+# drawing the plot
+p
+
+# creating summaries of the variables
+summary(factor(learning2014$gender))
+summary(learning2014$age)
+summary(learning2014$attitude)
+summary(learning2014$deep)
+summary(learning2014$stra)
+summary(learning2014$surf)
+summary(learning2014$points)
+```
+The data is divided in the plot matrix by gender, with females depicted by the color red and males by the color green. Looking at the distributions of variables in the graphical overview, you can quickly notice that the `age`-variable is  strongly skewed to the right. This is expected as the study population consists of students. We also notice a slight left skew in deep learning (`deep`) and the `points`-variable. The `attitude`-variable is slightly left skewed in males, but almost normal distribution in females. Additionally, suface learning (`surf`) is right skewed in males, but again closer to normal distribution in females.
+
+We can further appreciate the distributions and characteristics of individual variables by looking at the scatter and box plots of the plot matrix. For example, you could inspect if a certain variable has lots of outliers in the box plot or if spread is larger or different in the scatter plot.
+
+The graphical overview also shows correlation coefficients between variables. The most notable of these is the strong positive correlation between `attitude` and `points`. Also worth noting is the strong negative correlation between surface learning (`surf`) and both `attitude`and deep learning (`deep`) in male students that is absent in female students. There is also a significant negative correlation between surface learning (`surf`) and strategic learning (`stra`) when the students are analyzied overall.
+
+Looking at the summaries of the variables, you notice that the median age is quite young (median = 22 years) and that there are almost twice as many females as there are men (110 females to 56 males).
+
+## 3. Part
+
+Here I create a regression model where exam points is the target variable.
+
+```{r part 3}
+# accessing the GGally and ggplot2 libraries
+library(GGally)
+library(ggplot2)
+
+# creating a regression model with multiple explanatory variables
+my_model <- lm(points ~ attitude + stra + surf, data = learning2014)
+
+summary(my_model)
+
+# creating new model without non-significant explanatory variable surf
+my_model2 <- lm(points ~ attitude + stra, data = learning2014)
+summary(my_model2)
+
+```
+My initial model had attitude, strategic and surface learning as explanatory variables, as they seemed to have the largest correlation coefficients in the plot matrix. The square of the multiple correlation coefficient was 0.2074, i.e. These variables accounted for about 21% of the variation in the exam points. The omnibus F-test had a very low associated p-value, so there is very strong evidence that not all the three regression coefficients are zero. Looking at the coefficients, we notice that there are positive estimates in attitude and strategic learning, while surface learning has a negative estimate.The t-statistics of attitude is clearly above 0, meaning there is a possibility that we can reject the null hypothesis (no relationship between target variable and explanatory variable) and declare a relationship between `points` and `attitude`. This is supported by the small Pr(>|t|) in attribute, meaning there is a very small chance of seeing a relationship between `points` and `attitude` due to chance. The same cannot be said about strategic and surface learning. While strategic learning does have a t-value above 0, the probability that this is due to chace is above the cut-off point (p <0,05) as `stra` has Pr(>|t|) value of 0.11716. Surface learning is even more likely to have a relationship due to chance.
+
+After the first model, I removed the surface learning-variable from the model and fitted the new model without it. Looking at the new results, there isn't a dramatic chance in the results.
+
+
 
 Here we go again...
