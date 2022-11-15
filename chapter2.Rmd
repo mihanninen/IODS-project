@@ -44,6 +44,7 @@ str(learning2014)
 # a summary of the variables
 summary(learning2014)
 ```
+
 ## 2. Part
 
 Here I present a graphical overview of the data and show summaries of the variables in the data.
@@ -68,7 +69,8 @@ summary(learning2014$stra)
 summary(learning2014$surf)
 summary(learning2014$points)
 ```
-The data is divided in the plot matrix by gender, with females depicted by the color red and males by the color green. Looking at the distributions of variables in the graphical overview, you can quickly notice that the `age`-variable is  strongly skewed to the right. This is expected as the study population consists of students. We also notice a slight left skew in deep learning (`deep`) and the `points`-variable. The `attitude`-variable is slightly left skewed in males, but almost normal distribution in females. Additionally, suface learning (`surf`) is right skewed in males, but again closer to normal distribution in females.
+
+The data is divided in the plot matrix by gender, with females depicted by the color red and males by the color green. Looking at the distributions of variables in the graphical overview, you can quickly notice that the `age`-variable is strongly skewed to the right. This is expected as the study population consists of students. We also notice a slight left skew in deep learning (`deep`) and the `points`-variable. The `attitude`-variable is slightly left skewed in males, but almost normal distribution in females. Additionally, suface learning (`surf`) is right skewed in males, but again closer to normal distribution in females.
 
 We can further appreciate the distributions and characteristics of individual variables by looking at the scatter and box plots of the plot matrix. For example, you could inspect if a certain variable has lots of outliers in the box plot or if spread is larger or different in the scatter plot.
 
@@ -95,10 +97,43 @@ my_model2 <- lm(points ~ attitude + stra, data = learning2014)
 summary(my_model2)
 
 ```
-My initial model had attitude, strategic and surface learning as explanatory variables, as they seemed to have the largest correlation coefficients in the plot matrix. The square of the multiple correlation coefficient was 0.2074, i.e. These variables accounted for about 21% of the variation in the exam points. The omnibus F-test had a very low associated p-value, so there is very strong evidence that not all the three regression coefficients are zero. Looking at the coefficients, we notice that there are positive estimates in attitude and strategic learning, while surface learning has a negative estimate.The t-statistics of attitude is clearly above 0, meaning there is a possibility that we can reject the null hypothesis (no relationship between target variable and explanatory variable) and declare a relationship between `points` and `attitude`. This is supported by the small Pr(>|t|) in attribute, meaning there is a very small chance of seeing a relationship between `points` and `attitude` due to chance. The same cannot be said about strategic and surface learning. While strategic learning does have a t-value above 0, the probability that this is due to chace is above the cut-off point (p <0,05) as `stra` has Pr(>|t|) value of 0.11716. Surface learning is even more likely to have a relationship due to chance.
+My initial model had attitude, strategic and surface learning as explanatory variables, as they seemed to have the largest correlation coefficients in the plot matrix. Looking at the coefficients, we notice that there are positive estimates in attitude and strategic learning, while surface learning has a negative estimate. The t-statistic is the coefficient divided by the standard error. The larger the t-statistic value is, the more likely it is that the coefficient isn't 0 and that there is a relationship between the variables. The t-value of `attitude` is clearly above 0, meaning there is a possibility that we can reject the null hypothesis (no relationship between target variable and explanatory variable) and declare a relationship between `points` and `attitude`. This is supported by the small Pr(\>\|t\|) in attribute, meaning there is a very small chance of seeing a relationship between `points` and `attitude` due to chance. The same cannot be said about strategic and surface learning. While strategic learning does have a t-value above 0, the probability that this is due to chace is above the cut-off point (p \<0,05) as `stra` has a Pr(\>\|t\|) value of 0.11716. Surface learning is even more likely to have a relationship due to chance as `surf` has a t-value of -0.731 and a Pr(\>\|t\|) value of 0.11716.
 
-After the first model, I removed the surface learning-variable from the model and fitted the new model without it. Looking at the new results, there isn't a dramatic chance in the results.
+After the first model, I removed the `surf`variable from the model since it didn't have a significant relationship with the target variable `points`. The new model was fitted with only ´attitude`and`stra` as explanatory variables.
 
+## 4. Part
 
+Next I use the summary of my new fitted model and explain the relationship between the chosen explanatory variables and the target variable.
 
-Here we go again...
+```{r part 4}
+# accessing the GGally and ggplot2 libraries
+library(GGally)
+library(ggplot2)
+
+# my new model without the non-significant explanatory variable surf and its summary
+my_model2 <- lm(points ~ attitude + stra, data = learning2014)
+summary(my_model2)
+```
+In my new model we notice that both attitude and strategic learning have still positive estimates (0.34658 and 0.91365 respectively). This means that for every point the `attitude`-variable increases, the exam points increase 0.34658 on average (and 0.91365 in the case of `stra`). The t-statistics of attitude is clearly above 0 (t-value: 6.132), meaning there is a high possibility that we can declare a relationship between `points` and `attitude`. This is supported by the small Pr(\>\|t\|) in `attribute` (Pr(\>\|t\|): 6.31e-09), meaning there is a very small chance of seeing a relationship between `points` and `attitude` due to chance. Even though the t-statistics of `stra` is also clearly above 0 (t-value: 1.709) and the Pr(\>\|t\|) is smaller than before (Pr(\>\|t\|): 0.08927), it still falls short of the default cut-off point of p \<0.05. Therefore, we cannot say that there is a significant relationship between `points`and `stra`. Rather there is strong evidence of a potential relationship, but there is approximately an 8,9% probability that this is due to chance.
+
+The R-squared statistic provides a measure of how well the model fits data. A model with a R-squared value of 0 doesn't explain at all the variance in exam points and on the other hand a model with a R-squared value of 1 explains all of the variance in exam points. The square of the multiple correlation coefficient (multiple R-squared) of the model is 0.2048. As the multiple R-squared value increases with each additional explanatory variable, it is preferred to use the adjusted R-squared as it adjusts the value for the numbers of variables considered. The adjusted square of the multiple correlation coefficient (adjusted R-squared) is 0.1951, i.e. these variables accounted for about 20% of the variation in the exam points. This is marginally more than in the previous model. The residual standard error is a measure of the quality of the linear regression fit. It is the average amount that the target variable `points` will deviate from the true regression line. The smaller the residual standard error the better the model fits the dataset. In this model the residual standard error is 5.289, which is slightly better than the first model. The omnibus F-test had a very low associated p-value (p-value: 7.734e-09), so there is very strong evidence that neither of the two regression coefficients are zero.
+
+## 5. Part
+
+Finally I produce the following diagnostic plots of my model: Residuals vs Fitted values, Normal QQ-plot and Residuals vs Leverage.
+
+```{r}
+# divides the window into a 2x2 grid
+par(mfrow = c(2,2))
+
+# draws the diagnostic plots using the plot() function. The previously specified plots 1, 2 and 5 are selected
+plot(my_model2, c(1,2,5))
+```
+
+Linear regression has four main assumptions: linear relationship, independence, homoscedasticity and normality.
+
+We can use the residuals vs. fitted plot to evaluate if the there is correlation between residuals and fitted values. As we can see, the datapoints have a fairly random distribution around the 0 line, which supports the hypothesis that it is linear and the data is reasonably homoscedastic. There are a few outliers with large negative residuals, but these don't appear to alter the overall variance in the data.
+
+Using the normal Q-Q plot, we can evaluate the skewness of data and fit of model. My model seems to be slightly skewed left, but is fairly normally distributed overall.
+
+Finally, we can use the residuals vs. leverage plot to assess linearity and influential points. Influential points are observations, that when removed from the dataset could change the coefficients of the model when fitting again. Here we can see that the the spread is nicely linear. No influentials points are observed in the spread.
