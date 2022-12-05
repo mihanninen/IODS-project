@@ -118,7 +118,7 @@ library(dplyr)
 keep_columns <- c("Tea", "How", "sugar", "how", "sex", "age_Q", "frequency")
 
 #select the 'keep_columns' to create a new data set
-tea_time <- select(tea, keep_columns)
+tea_time <- dplyr::select(tea, keep_columns)
 
 #access the ggplot and tidyr library
 library(ggplot2)
