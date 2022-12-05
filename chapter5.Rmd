@@ -1,0 +1,152 @@
+---
+---
+---
+
+# Assignment 5 - Dimensionality reduction techniques
+
+```{r}
+
+date()
+
+```
+
+## Exploring the data
+
+Here we look at the variables of the `human` data, that we made previously.
+
+```{r}
+
+#read the 'human' data set into memory
+human <- read.csv("~/Documents/Tohtoritutkinto/Open Science/IODS-project/data/human.csv", row.names = 1)
+
+summary(human)
+
+#access GGally library
+library(GGally)
+
+#visualize the 'human' variables
+ggpairs(human, progress = FALSE)
+
+#access corrplot library
+library(corrplot)
+
+#compute the correlation matrix and visualize it with corrplot
+cor(human) %>% corrplot()
+```
+
+As we look at the summaries of the variables and the pairs plot, we can see that Gross National Income per capita (`GNI`), maternal mortality ratio (`Mat.Mor`) and adolescent birth rate (`Ado.Birth`) all have heavily right-skewed distributions. On the other hand, both Life expectancy (`Life.Exp`) and ratio of labor force participation of females and males (`Labo.FM`) have left-skewed distributions. The distribution ratio of female and male populations with secondary education has a positive kurtosis.
+
+Looking at the pairs plot and correlation plot we notice that there are a few significant correlations between our variables. There is a high positive correlation between `Ado.Birth` and `Mat.Mor` (0.759). There is also a high negative correlation between `Life.Exp` and both `Mat.Mor` (-0.857) and `Ado.Birth` (-0.729). On the other hand, there is a high positive correlation between `Life.Exp` and expected years of schooling (`Edu.Exp`) (0.789). Lastly, there is a positive correlation between Gross National Income per capita (GNI) and both `Life.Exp` (0.627) and `Edu.Exp` (0.624).
+
+## Principal component analysis
+
+Next we perform the principal component analysis (PCA) on the raw (non-standardized) `human` data.
+
+```{r out.width="100%", fig.cap = "*PCA with raw data: PC1 explains almost all of the variance. GNI has a heavy negative loading on PC1, while the other variables do not seem to have a significant loading on either PC.*"}
+
+#perform principal component analysis (with the singular value decomposition method)
+pca_human <- prcomp(human)
+
+#create a summary of pca_human
+s <- summary(pca_human)
+
+#rounded percentages of variance captured by each PC
+pca_pr <- round(100*s$importance[2, ], digits = 2)
+
+#print out the percentages of variance
+pca_pr
+
+#create object pc_lab to be used as axis labels
+pc_lab <- paste0(names(pca_pr), " (", pca_pr, "%)")
+
+#draw a biplot of the principal component representation and the original variables
+biplot(pca_human, choices = 1:2, cex = c(0.8, 1), col = c("navyblue", "firebrick1"), xlab = pc_lab[1], ylab = pc_lab[2])
+
+```
+
+Next we standardize the variables and repeat the above analysis.
+
+```{r dpi = 200, fig.cap = "*PCA with standardized data: PC1 explains 53.61% of the variance, while PC2 explains 16.24%. Mat.Mor and Ado.Birth have both positive loading on PC1, while Edu2.FM, GNI, Edu.Exp and Life.Exp have negative loading on PC1. Parli.F and Labo.FM have both a positive loading on PC2. No variables seem to have a significant negative loading on PC2.*"}
+
+#standardize the variables
+human_std <- scale(human)
+
+#perform principal component analysis on the standardized variables (with the SVD method)
+pca_human_std <- prcomp(human_std)
+
+#create and print out a summary of pca_human_std
+s2 <- summary(pca_human_std)
+
+#rounded percentanges of variance captured by each PC
+pca_pr2 <- round(100*s2$importance[2, ], digits = 2)
+
+#print out the percentages of variance
+pca_pr2
+
+# create object pc_lab to be used as axis labels
+pc_lab2 <- paste0(names(pca_pr2), " (", pca_pr2, "%)")
+
+#draw a biplot of the principal component representation and the standardized variables
+biplot(pca_human_std, choices = 1:2, cex = c(0.8, 1), col = c("navyblue", "firebrick1"), xlab = pc_lab2[1], ylab = pc_lab2[2])
+
+```
+
+As we can see, the results for the two PCAs are very different. In the first PCA using the non-standardized data, we see that the first principal component (PC1) explains almost all of the variance (99,99%) and the second principal component (PC2) explains only 00,01%. After standardization, PC1 explains 53,61% and PC2 explains 16,24% of the variance. I believe this difference is due to the different scaling of the raw variables. Looking at the previous section, we can see that `GNI`has a much larger scale compared to the other variables. This is evident in the first biplot, where the only arrow that is visible is GNI. This shows that the first PCA has loaded heavily on the `GNI` variable. Once the variables are standardized the scaling is very similar between variables and the PCA is no longer influenced by possible different variable scales.
+
+My own interpretation of the first two principal component dimensions is that the PC1 relates to how developed the country is. The reasoning behind this comes from the variables related to PC1: Mat.Mor, Ado.Birth, Edu2.FM, GNI, Edu.Exp, Life.Exp. All of the variables are key factors when assessing the development stage of a country. This is further supported when looking at biplot as richer and more developed countries (e.g. many European nations) are on the left side while many poorer countries (e.g. many African nations) are on the right side. The PC2 seems to be related to female participation in society as the variables related to PC2 were Parli.F and Labo.FM. We can also notice that the countries that are furthest away from these variables are fairly male-centric (e.g. arabic nations).
+
+## Multiple Correspondence Analysis
+
+Next we will look at `tea` data. The tea data comes from the FactoMineR package and it is measured with a questionnaire on tea: 300 individuals were asked how they drink tea (18 questions) and what are their product's perception (12 questions). In addition, some personal details were asked (4 questions). We will look at the dimensions and structure of the data and finally visualize it.
+
+```{r dpi = 200}
+
+#read tea data set into memory and convert character variables to factors
+tea <- read.csv("https://raw.githubusercontent.com/KimmoVehkalahti/Helsinki-Open-Data-Science/master/datasets/tea.csv", stringsAsFactors = TRUE)
+
+#look at the dimension and structure of the data
+dim(tea)
+str(tea)
+
+#browse the contents of the data frame
+View(tea)
+
+#access dplyr library
+library(dplyr)
+
+#selecting columns to keep in the data set for visualization and MCA
+keep_columns <- c("Tea", "How", "sugar", "how", "sex", "age_Q", "frequency")
+
+#select the 'keep_columns' to create a new data set
+tea_time <- select(tea, keep_columns)
+
+#access the ggplot and tidyr library
+library(ggplot2)
+library(tidyr)
+
+#visualize the data set
+pivot_longer(tea_time, cols = everything()) %>% 
+  ggplot(aes(value)) + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8)) + facet_wrap("name", scales = "free")
+
+```
+
+Looking at the structure of the `tea` data frame, we see that there are 36 different variables and 300 observations. Almost all of the variables are factors except `age` which is an integer. For the visualization and upcoming analysis I chose seven variables that seemed interesting to me. From the visualization we can see that Earl Grey is the most popular tea variety. Most people drink their tea alone (without any additions). Most people drink tea at least once per day. Most people use tea bags. Use of sugar is fairly split between. There were slightly more females than males in the questionnaire. The most populous age quartile from the questionnaire was ages 15 to 24.
+
+
+Next we do the multiple correspondence analysis (MCA) for the selected variables.
+
+```{r}
+
+#multiple correspondence analysis
+library(FactoMineR)
+mca <- MCA(tea_time, graph = FALSE)
+
+#summary of the model
+summary(mca)
+
+#visualize MCA with the variable biplot
+plot(mca, invisible=c("ind"), habillage = "quali", graph.type = "classic")
+
+```
+
+Looking at the variable biplot, we can see that the first two dimensions of the MCA capture 10.75% and 9.44% of the total variance. The horizontal dimension opposes "other" tea drinkers with the other options. The vertical dimension opposes male and female as well as unpackaged tea to the other options. It also seems to oppose Earl Grey form the other tea varieties. The age quartiles are linked to both dimensions. Looking at how the variables are spread, we can make the assumption that older men are more likely to use unpackaged tea of green and black variety than young females.
